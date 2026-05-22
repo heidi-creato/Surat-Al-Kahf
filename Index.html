@@ -1,1 +1,633 @@
-https://cdn.islamic.network/quran/audio/64/{القارئ}/{الرقم_المطلق}.mp3
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>القارئ الذكي | سور كاملة بسلاسة + آيات مفردة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(145deg, #e9f5ef 0%, #d4e4dc 100%);
+            color: #1e293b;
+            padding: 16px;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.2s;
+        }
+        body.dark {
+            background: linear-gradient(145deg, #0f172a 0%, #0a0f1c 100%);
+            color: #e2e8f0;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 36px;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        body.dark .card {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(51, 65, 85, 0.6);
+        }
+        .header { text-align: center; }
+        .header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #1f5e4b, #2c8c6b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .sub { font-size: 0.8rem; color: #2c5f2d; }
+        body.dark .sub { color: #9bc4cb; }
+
+        /* أزرار دائرية */
+        .scroll-section { margin: 15px 0; overflow-x: auto; white-space: nowrap; padding: 8px 0; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+        .circles-container { display: inline-flex; gap: 10px; padding: 0 5px; }
+        .circle-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 52px; height: 52px; background: #2b6e4f; color: white;
+            border-radius: 50%; font-weight: bold; font-size: 1rem;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: none; padding: 0 12px;
+        }
+        .circle-btn.active { background: #c2410c; transform: scale(1.05); }
+        .ayah-circle { min-width: 44px; height: 44px; background: #4b7b6c; font-size: 0.9rem; }
+        .circle-btn:active { transform: scale(0.96); }
+
+        /* تحكمات */
+        .flex-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0 10px; align-items: flex-end; }
+        .input-group { flex: 1; min-width: 120px; }
+        .input-group label { font-size: 0.7rem; font-weight: 600; display: block; margin-bottom: 4px; color: #2b6e4f; }
+        body.dark .input-group label { color: #94a3b8; }
+        input, select, button {
+            width: 100%; padding: 10px 12px; border-radius: 60px; border: none;
+            background: white; font-family: 'Cairo', sans-serif; font-size: 0.9rem; outline: none;
+        }
+        body.dark input, body.dark select { background: #1e293b; color: #f1f5f9; border: 1px solid #475569; }
+        button {
+            background: #2b6e4f; color: white; font-weight: bold; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-outline { background: rgba(255,255,240,0.9); color: #1f4e3d; border: 1px solid #cbd5e1; }
+        body.dark .btn-outline { background: #2d3b4f; color: #e0f2fe; }
+
+        .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 10px; margin: 15px 0; }
+        .action-btn { padding: 8px 5px; font-size: 0.8rem; }
+
+        /* أقسام التشغيل */
+        .mode-section {
+            background: #e0f2fe; border-radius: 40px; padding: 10px 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin: 10px 0; gap: 10px; flex-wrap: wrap;
+        }
+        body.dark .mode-section { background: #1e3a4d; }
+        .mode-buttons { display: flex; gap: 10px; }
+        .mode-btn { background: #0f4c5c; color: white; border: none; padding: 6px 20px; border-radius: 40px; font-size: 0.85rem; cursor: pointer; }
+        .mode-btn.stop { background: #9e2d2d; }
+        .mode-btn.active { background: #c2410c; box-shadow: 0 0 0 2px #fff; }
+
+        .sequential-mode { background: #fef3c7; border-radius: 40px; padding: 8px 15px; display: flex; align-items: center; justify-content: space-between; margin: 10px 0; flex-wrap: wrap; gap: 8px; }
+        body.dark .sequential-mode { background: #332811; }
+        .toggle-switch { position: relative; display: inline-block; width: 52px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #2b6e4f; }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        progress { width: 100%; height: 8px; border-radius: 10px; }
+        .time-stamp { display: flex; justify-content: space-between; font-size: 0.7rem; margin-top: 4px; }
+        .ayah-container { background: #fefaf0; border-radius: 28px; padding: 1.2rem; margin-top: 15px; }
+        body.dark .ayah-container { background: #0f172a; }
+        .ayah-number { font-size: 1rem; color: #c2410c; border-right: 3px solid #c2410c; padding-right: 8px; display: inline-block; }
+        .ayah-text { font-size: 1.5rem; line-height: 2.2rem; font-family: 'Amiri', serif; margin: 12px 0; }
+        .translation { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 20px; font-size: 0.85rem; border-right: 3px solid #2b6e4f; }
+        body.dark .translation { background: #1e293b; }
+        .error-msg { color: #dc2626; font-size: 0.7rem; text-align: center; margin-top: 6px; }
+        .mode-indicator { display: inline-block; background: #2b6e4f20; border-radius: 30px; padding: 4px 12px; font-size: 0.7rem; margin-right: 8px; }
+        footer { text-align: center; font-size: 0.6rem; margin-top: 20px; opacity: 0.7; }
+        @media (max-width: 550px) {
+            .circle-btn { min-width: 44px; height: 44px; font-size: 0.85rem; }
+            .ayah-circle { min-width: 38px; height: 38px; }
+            .ayah-text { font-size: 1.2rem; line-height: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card header">
+        <h1><i class="fas fa-quran"></i> القارئ الذكي</h1>
+        <div class="sub">سور كاملة بسلاسة + آيات مفردة + تسلسل تلقائي</div>
+        <button id="darkToggle" style="background: transparent; color:#2b6e4f; margin-top:6px; width:auto;"><i class="fas fa-moon"></i> مظلم</button>
+    </div>
+
+    <div class="card">
+        <!-- أزرار السور الدائرية -->
+        <div class="scroll-section"><div class="circles-container" id="surahCircles"></div></div>
+        <!-- أزرار الآيات الدائرية -->
+        <div class="scroll-section"><div class="circles-container" id="ayahCircles"></div></div>
+
+        <!-- إدخال بيانات السورة -->
+        <div class="flex-row">
+            <div class="input-group"><label>رقم السورة</label><input type="number" id="surahNumber" min="1" max="114" value="18"></div>
+            <div class="input-group"><label>اسم السورة</label><select id="surahNameSelect"></select></div>
+            <div class="input-group"><label>القارئ</label><select id="reciterSelect">
+                <option value="ar.alafasy">مشاري العفاسي</option>
+                <option value="ar.abdulbasit">عبد الباسط عبد الصمد</option>
+                <option value="ar.mahermuaiqly">ماهر المعيقلي</option>
+                <option value="ar.saoodalshuraym">سعود الشريم</option>
+            </select></div>
+        </div>
+
+        <!-- اختيار الآية (للوضع المفرد) -->
+        <div class="flex-row">
+            <div class="input-group"><label>رقم الآية</label><input type="number" id="ayahNumber" min="1" value="1"></div>
+            <button id="playAyahBtn" class="btn-outline"><i class="fas fa-play"></i> تشغيل آية</button>
+        </div>
+
+        <!-- أزرار تحكم سريعة -->
+        <div class="actions-grid">
+            <button id="prevBtn" class="action-btn btn-outline"><i class="fas fa-backward"></i> سابق</button>
+            <button id="nextBtn" class="action-btn btn-outline"><i class="fas fa-forward"></i> تالي</button>
+            <button id="repeatBtn" class="action-btn btn-outline"><i class="fas fa-redo-alt"></i> تكرار</button>
+            <button id="stopBtn" class="action-btn btn-outline"><i class="fas fa-stop"></i> إيقاف</button>
+            <button id="randomBtn" class="action-btn btn-outline"><i class="fas fa-random"></i> عشوائي</button>
+        </div>
+
+        <!-- قسم تشغيل السورة كاملة (ملف واحد) -->
+        <div class="mode-section">
+            <span><i class="fas fa-list-alt"></i> <strong>تشغيل السورة كاملة</strong> (ملف واحد متصل - بدون تقطيع)</span>
+            <div class="mode-buttons">
+                <button id="playFullSurahBtn" class="mode-btn"><i class="fas fa-play-circle"></i> تشغيل السورة</button>
+                <button id="stopFullSurahBtn" class="mode-btn stop"><i class="fas fa-stop-circle"></i> إيقاف الكل</button>
+            </div>
+        </div>
+
+        <!-- وضع التلاوة المتسلسلة آية بعد آية -->
+        <div class="sequential-mode">
+            <span><i class="fas fa-infinity"></i> <strong>التلاوة المتسلسلة</strong> (آية بعد آية عبر السور)</span>
+            <label class="toggle-switch"><input type="checkbox" id="seqToggle"><span class="slider"></span></label>
+        </div>
+
+        <!-- شريط التقدم -->
+        <div><progress id="progressBar" value="0" max="100"></progress><div class="time-stamp"><span id="currentTime">0:00</span><span id="durationTime">0:00</span></div></div>
+        <div id="errorMsg" class="error-msg"></div>
+
+        <!-- عرض النص والترجمة -->
+        <div class="ayah-container">
+            <div class="ayah-number">سورة <span id="surahNameDisplay">الكهف</span> - الآية <span id="displayAyah">1</span> <span id="modeIndicator" class="mode-indicator">آية مفردة</span></div>
+            <div class="ayah-text" id="ayahText">⏳ جاري التحميل...</div>
+            <div class="translation" id="translationText"><i class="fas fa-language"></i> ترجمة المعاني</div>
+        </div>
+    </div>
+    <footer>🔊 تشغيل السورة كاملة = ملف واحد متصل | الآيات المفردة = تقطيع دقيق | روابط موثوقة</footer>
+</div>
+
+<audio id="audioPlayer" preload="auto"></audio>
+
+<script>
+    // ========== بيانات السور وأعداد الآيات والأسماء ==========
+    const surahNames = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
+    const surahAyahCount = [7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
+
+    // حساب الرقم المطلق للآية (لروابط الآيات المفردة)
+    function getAbsoluteAyahNumber(surah, ayah) {
+        let total = 0;
+        for (let i = 1; i < surah; i++) total += surahAyahCount[i-1];
+        return total + ayah;
+    }
+
+    // ========== متغيرات التطبيق ==========
+    let currentSurah = 18, currentAyah = 1, currentReciter = "ar.alafasy";
+    let repeatMode = false, sequentialMode = false, fullSurahMode = false;
+    let isPlaying = false, isLoading = false;
+
+    // عناصر DOM
+    const surahNumberInput = document.getElementById("surahNumber");
+    const surahNameSelect = document.getElementById("surahNameSelect");
+    const ayahInput = document.getElementById("ayahNumber");
+    const reciterSelect = document.getElementById("reciterSelect");
+    const playAyahBtn = document.getElementById("playAyahBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const repeatBtn = document.getElementById("repeatBtn");
+    const randomBtn = document.getElementById("randomBtn");
+    const seqToggle = document.getElementById("seqToggle");
+    const playFullSurahBtn = document.getElementById("playFullSurahBtn");
+    const stopFullSurahBtn = document.getElementById("stopFullSurahBtn");
+    const displaySurahNameSpan = document.getElementById("surahNameDisplay");
+    const displayAyahSpan = document.getElementById("displayAyah");
+    const ayahTextSpan = document.getElementById("ayahText");
+    const translationSpan = document.getElementById("translationText");
+    const progressBar = document.getElementById("progressBar");
+    const currentTimeSpan = document.getElementById("currentTime");
+    const durationSpan = document.getElementById("durationTime");
+    const errorDiv = document.getElementById("errorMsg");
+    const modeIndicator = document.getElementById("modeIndicator");
+    const audioElem = document.getElementById("audioPlayer");
+    const darkToggle = document.getElementById("darkToggle");
+    const surahCirclesDiv = document.getElementById("surahCircles");
+    const ayahCirclesDiv = document.getElementById("ayahCircles");
+
+    // ========== بناء الأزرار الدائرية ==========
+    function buildSurahCircles() {
+        surahCirclesDiv.innerHTML = "";
+        for(let i=1; i<=114; i++) {
+            const btn = document.createElement("button");
+            btn.className = "circle-btn" + (i === currentSurah ? " active" : "");
+            btn.textContent = i;
+            btn.addEventListener("click", () => changeSurah(i));
+            surahCirclesDiv.appendChild(btn);
+        }
+    }
+    function buildAyahCircles() {
+        ayahCirclesDiv.innerHTML = "";
+        const maxAyah = surahAyahCount[currentSurah-1];
+        for(let i=1; i<=maxAyah; i++) {
+            const btn = document.createElement("button");
+            btn.className = "circle-btn ayah-circle" + (i === currentAyah ? " active" : "");
+            btn.textContent = i;
+            btn.addEventListener("click", () => changeAyah(i));
+            ayahCirclesDiv.appendChild(btn);
+        }
+        const active = ayahCirclesDiv.querySelector(".ayah-circle.active");
+        if(active) active.scrollIntoView({ behavior:"smooth", block:"nearest", inline:"center" });
+    }
+    function updateActiveSurahCircle() {
+        document.querySelectorAll("#surahCircles .circle-btn").forEach((btn, idx) => {
+            if(idx+1 === currentSurah) btn.classList.add("active");
+            else btn.classList.remove("active");
+        });
+    }
+    function updateActiveAyahCircle() {
+        document.querySelectorAll("#ayahCircles .circle-btn").forEach(btn => {
+            if(parseInt(btn.textContent) === currentAyah) btn.classList.add("active");
+            else btn.classList.remove("active");
+        });
+    }
+
+    // ========== جلب النص والترجمة ==========
+    async function fetchAyahData(surah, ayah) {
+        try {
+            const arabicRes = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/ar.alafasy`);
+            const arabicData = await arabicRes.json();
+            let arabic = "﴿ الآية ﴾";
+            if(arabicData.code === 200) arabic = arabicData.data.text;
+            const transRes = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/en.sahih`);
+            const transData = await transRes.json();
+            let trans = "ترجمة المعاني";
+            if(transData.code === 200) trans = transData.data.text;
+            return { arabic, translation: trans };
+        } catch(e) {
+            return { arabic: "﴿ خطأ في التحميل ﴾", translation: "يرجى التحقق من الاتصال" };
+        }
+    }
+    async function updateDisplay() {
+        displayAyahSpan.innerText = currentAyah;
+        ayahTextSpan.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جلب النص...';
+        translationSpan.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جلب الترجمة...';
+        const { arabic, translation } = await fetchAyahData(currentSurah, currentAyah);
+        ayahTextSpan.innerText = arabic;
+        translationSpan.innerHTML = `<i class="fas fa-language"></i> ${translation.substring(0,300)}`;
+        displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+    }
+
+    // ========== دوال الصوت ==========
+    // رابط السورة كاملة (ملف واحد)
+    function getFullSurahUrl() {
+        return `https://cdn.islamic.network/quran/audio-surah/64/${currentReciter}/${currentSurah}.mp3`;
+    }
+    // رابط الآية المفردة
+    function getSingleAyahUrl() {
+        const absolute = getAbsoluteAyahNumber(currentSurah, currentAyah);
+        return `https://cdn.islamic.network/quran/audio/64/${currentReciter}/${absolute}.mp3`;
+    }
+
+    async function playAudio(url) {
+        if(isLoading) return;
+        isLoading = true;
+        errorDiv.innerText = "";
+        try {
+            if(audioElem.src !== url) {
+                audioElem.src = url;
+                audioElem.load();
+            }
+            await audioElem.play();
+            isPlaying = true;
+        } catch(err) {
+            errorDiv.innerText = "❌ تعذر التشغيل. جرب قارئاً آخر أو تأكد من اتصالك.";
+            isPlaying = false;
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    // تشغيل آية مفردة
+    async function playSingleAyah() {
+        if(fullSurahMode) stopAll();
+        fullSurahMode = false;
+        sequentialMode = false; seqToggle.checked = false;
+        modeIndicator.innerText = "آية مفردة";
+        let surah = parseInt(surahNumberInput.value);
+        if(isNaN(surah)) surah = currentSurah;
+        surah = Math.min(114, Math.max(1, surah));
+        let ayah = parseInt(ayahInput.value);
+        if(isNaN(ayah)) ayah = currentAyah;
+        const maxAyah = surahAyahCount[surah-1];
+        ayah = Math.min(maxAyah, Math.max(1, ayah));
+        if(surah !== currentSurah || ayah !== currentAyah) {
+            currentSurah = surah; currentAyah = ayah;
+            surahNumberInput.value = currentSurah;
+            ayahInput.value = currentAyah;
+            displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+            await updateDisplay();
+            updateActiveSurahCircle(); buildAyahCircles(); surahNameSelect.value = currentSurah;
+        }
+        currentReciter = reciterSelect.value;
+        await playAudio(getSingleAyahUrl());
+        savePrefs();
+    }
+
+    // تشغيل السورة كاملة (ملف واحد متصل)
+    async function playFullSurah() {
+        stopAll();
+        fullSurahMode = true;
+        sequentialMode = false; seqToggle.checked = false;
+        repeatMode = false; repeatBtn.style.background = "";
+        modeIndicator.innerText = "🎧 سورة كاملة (بدون تقطيع)";
+        let surah = parseInt(surahNumberInput.value);
+        if(isNaN(surah)) surah = currentSurah;
+        surah = Math.min(114, Math.max(1, surah));
+        if(surah !== currentSurah) {
+            currentSurah = surah;
+            surahNumberInput.value = currentSurah;
+            displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+            await updateDisplay();
+            updateActiveSurahCircle(); buildAyahCircles(); surahNameSelect.value = currentSurah;
+        }
+        currentReciter = reciterSelect.value;
+        await playAudio(getFullSurahUrl());
+        savePrefs();
+    }
+
+    // إيقاف كل شيء
+    function stopAll() {
+        fullSurahMode = false;
+        audioElem.pause();
+        audioElem.currentTime = 0;
+        isPlaying = false;
+        progressBar.value = 0;
+        currentTimeSpan.innerText = "0:00";
+        durationSpan.innerText = "0:00";
+        modeIndicator.innerText = "آية مفردة";
+    }
+
+    // ========== التنقل اليدوي ==========
+    async function nextManual() {
+        if(fullSurahMode) stopAll();
+        const maxAyah = surahAyahCount[currentSurah-1];
+        if(currentAyah < maxAyah) {
+            currentAyah++;
+        } else {
+            if(currentSurah < 114) {
+                currentSurah++;
+                currentAyah = 1;
+                updateActiveSurahCircle(); buildAyahCircles();
+                surahNumberInput.value = currentSurah;
+                surahNameSelect.value = currentSurah;
+                displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+            } else {
+                errorDiv.innerText = "نهاية المصحف الكريم.";
+                return;
+            }
+        }
+        ayahInput.value = currentAyah;
+        await updateDisplay();
+        await playAudio(getSingleAyahUrl());
+        savePrefs();
+        updateActiveAyahCircle();
+    }
+    async function prevManual() {
+        if(fullSurahMode) stopAll();
+        if(currentAyah > 1) {
+            currentAyah--;
+        } else {
+            if(currentSurah > 1) {
+                currentSurah--;
+                currentAyah = surahAyahCount[currentSurah-1];
+                updateActiveSurahCircle(); buildAyahCircles();
+                surahNumberInput.value = currentSurah;
+                surahNameSelect.value = currentSurah;
+                displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+            } else {
+                errorDiv.innerText = "أول المصحف الكريم.";
+                return;
+            }
+        }
+        ayahInput.value = currentAyah;
+        await updateDisplay();
+        await playAudio(getSingleAyahUrl());
+        savePrefs();
+        updateActiveAyahCircle();
+    }
+    async function randomAyah() {
+        if(fullSurahMode) stopAll();
+        const randSurah = Math.floor(Math.random() * 114) + 1;
+        const maxAyah = surahAyahCount[randSurah-1];
+        const randAyah = Math.floor(Math.random() * maxAyah) + 1;
+        currentSurah = randSurah; currentAyah = randAyah;
+        surahNumberInput.value = currentSurah; ayahInput.value = currentAyah;
+        surahNameSelect.value = currentSurah;
+        displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+        await updateDisplay();
+        await playAudio(getSingleAyahUrl());
+        updateActiveSurahCircle(); buildAyahCircles();
+        savePrefs();
+    }
+    function toggleRepeat() {
+        repeatMode = !repeatMode;
+        repeatBtn.style.background = repeatMode ? "#c44536" : "";
+        repeatBtn.innerHTML = repeatMode ? "🔁 إلغاء التكرار" : "🔄 تكرار";
+    }
+
+    // وضع التسلسل التلقائي (آية بعد آية)
+    async function nextAyahSequential() {
+        if(fullSurahMode) return;
+        const maxAyah = surahAyahCount[currentSurah-1];
+        let nextAyah = currentAyah + 1;
+        let nextSurah = currentSurah;
+        if(nextAyah > maxAyah) {
+            nextSurah = currentSurah + 1;
+            if(nextSurah > 114) {
+                sequentialMode = false; seqToggle.checked = false;
+                errorDiv.innerText = "🏁 انتهى المصحف.";
+                return;
+            }
+            nextAyah = 1;
+        }
+        currentSurah = nextSurah; currentAyah = nextAyah;
+        surahNumberInput.value = currentSurah; ayahInput.value = currentAyah;
+        displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+        await updateDisplay();
+        updateActiveSurahCircle(); buildAyahCircles(); surahNameSelect.value = currentSurah;
+        await playAudio(getSingleAyahUrl());
+        savePrefs();
+    }
+
+    // ========== أحداث الصوت ==========
+    function onAudioEnded() {
+        if(repeatMode && !fullSurahMode && !sequentialMode) {
+            audioElem.currentTime = 0;
+            audioElem.play().catch(e=>console.warn);
+        } else if(fullSurahMode) {
+            // السورة الكاملة انتهت - لا تفعل شيء تلقائي
+            fullSurahMode = false;
+            modeIndicator.innerText = "آية مفردة";
+            errorDiv.innerText = "✅ انتهت السورة كاملة.";
+            setTimeout(() => { if(errorDiv.innerText.includes("انتهت")) errorDiv.innerText = ""; }, 3000);
+        } else if(sequentialMode) {
+            nextAyahSequential().catch(console.warn);
+        } else {
+            isPlaying = false;
+        }
+    }
+
+    function bindAudioEvents() {
+        audioElem.addEventListener("timeupdate", () => {
+            if(audioElem.duration && !isNaN(audioElem.duration)) {
+                const percent = (audioElem.currentTime / audioElem.duration) * 100;
+                progressBar.value = percent;
+                currentTimeSpan.innerText = formatTime(audioElem.currentTime);
+                durationSpan.innerText = formatTime(audioElem.duration);
+            }
+        });
+        audioElem.addEventListener("ended", onAudioEnded);
+        audioElem.addEventListener("error", () => {
+            if(!errorDiv.innerText.includes("قارئ"))
+                errorDiv.innerText = "⚠️ خطأ في الصوت. قد لا يتوفر هذا الملف، جرب قارئاً آخر.";
+        });
+    }
+    function formatTime(sec) {
+        if(isNaN(sec)) return "0:00";
+        let m = Math.floor(sec/60);
+        let s = Math.floor(sec%60);
+        return `${m}:${s<10 ? '0'+s : s}`;
+    }
+
+    // ========== تغيير السورة والآية ==========
+    async function changeSurah(surahNum) {
+        if(fullSurahMode) stopAll();
+        surahNum = Math.min(114, Math.max(1, surahNum));
+        currentSurah = surahNum;
+        surahNumberInput.value = currentSurah;
+        surahNameSelect.value = currentSurah;
+        let maxAyah = surahAyahCount[currentSurah-1];
+        if(currentAyah > maxAyah) currentAyah = 1;
+        ayahInput.value = currentAyah;
+        displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+        await updateDisplay();
+        await playAudio(getSingleAyahUrl());
+        savePrefs();
+        updateActiveSurahCircle();
+        buildAyahCircles();
+    }
+    async function changeAyah(ayahNum) {
+        if(fullSurahMode) stopAll();
+        const maxAyah = surahAyahCount[currentSurah-1];
+        ayahNum = Math.min(maxAyah, Math.max(1, ayahNum));
+        if(ayahNum === currentAyah) return;
+        currentAyah = ayahNum;
+        ayahInput.value = currentAyah;
+        await updateDisplay();
+        await playAudio(getSingleAyahUrl());
+        savePrefs();
+        updateActiveAyahCircle();
+    }
+
+    // ========== حفظ واستعادة التفضيلات ==========
+    function savePrefs() {
+        localStorage.setItem("quran_surah", currentSurah);
+        localStorage.setItem("quran_ayah", currentAyah);
+        localStorage.setItem("quran_reciter", currentReciter);
+        localStorage.setItem("quran_seq", sequentialMode ? "true" : "false");
+        localStorage.setItem("quran_dark", document.body.classList.contains("dark") ? "dark" : "light");
+    }
+    async function loadPrefs() {
+        let s = localStorage.getItem("quran_surah");
+        if(s && !isNaN(parseInt(s))) currentSurah = Math.min(114, Math.max(1, parseInt(s)));
+        surahNumberInput.value = currentSurah;
+        let a = localStorage.getItem("quran_ayah");
+        if(a && !isNaN(parseInt(a))) {
+            let maxA = surahAyahCount[currentSurah-1];
+            currentAyah = Math.min(maxA, Math.max(1, parseInt(a)));
+        }
+        ayahInput.value = currentAyah;
+        let r = localStorage.getItem("quran_reciter");
+        if(r && ["ar.alafasy","ar.abdulbasit","ar.mahermuaiqly","ar.saoodalshuraym"].includes(r)) {
+            currentReciter = r;
+            reciterSelect.value = currentReciter;
+        }
+        let sq = localStorage.getItem("quran_seq");
+        sequentialMode = (sq === "true");
+        seqToggle.checked = sequentialMode;
+        let dark = localStorage.getItem("quran_dark");
+        if(dark === "dark") document.body.classList.add("dark");
+        displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+        await updateDisplay();
+        updateActiveSurahCircle(); buildAyahCircles();
+        // تحميل صوت مسبق (لا تشغيل تلقائي)
+        let preloadUrl = getSingleAyahUrl();
+        audioElem.src = preloadUrl;
+        audioElem.load();
+    }
+
+    function buildSurahSelect() {
+        surahNameSelect.innerHTML = "";
+        for(let i=0; i<surahNames.length; i++) {
+            let opt = document.createElement("option");
+            opt.value = i+1;
+            opt.textContent = `${i+1} - ${surahNames[i]}`;
+            surahNameSelect.appendChild(opt);
+        }
+        surahNameSelect.value = currentSurah;
+        surahNameSelect.addEventListener("change", () => changeSurah(parseInt(surahNameSelect.value)));
+    }
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark");
+        savePrefs();
+    }
+
+    // ========== تهيئة التطبيق ==========
+    async function init() {
+        bindAudioEvents();
+        buildSurahSelect();
+        buildSurahCircles();
+        await loadPrefs();
+        playAyahBtn.onclick = () => playSingleAyah();
+        stopBtn.onclick = () => stopAll();
+        prevBtn.onclick = () => prevManual();
+        nextBtn.onclick = () => nextManual();
+        repeatBtn.onclick = () => toggleRepeat();
+        randomBtn.onclick = () => randomAyah();
+        seqToggle.onchange = () => {
+            if(fullSurahMode) stopAll();
+            sequentialMode = seqToggle.checked;
+            savePrefs();
+        };
+        playFullSurahBtn.onclick = () => playFullSurah();
+        stopFullSurahBtn.onclick = () => stopAll();
+        darkToggle.onclick = () => toggleDarkMode();
+        surahNumberInput.addEventListener("change", () => changeSurah(parseInt(surahNumberInput.value)));
+        ayahInput.addEventListener("change", () => playSingleAyah());
+        reciterSelect.addEventListener("change", () => {
+            currentReciter = reciterSelect.value;
+            if(fullSurahMode) playFullSurah();
+            else playSingleAyah();
+            savePrefs();
+        });
+        errorDiv.innerText = "✅ التطبيق جاهز | السور الكاملة تعمل بسلاسة تامة";
+    }
+    init();
+</script>
+</body>
+</html>
