@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>مساعد الكهف - تلاوة وتدبر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(145deg, #e9f5ef 0%, #d4e4dc 100%);
+            color: #1e293b;
+            padding: 16px;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.2s;
+        }
+
+        body.dark {
+            background: linear-gradient(145deg, #0f172a 0%, #0a0f1c 100%);
+            color: #e2e8f0;
+        }
+
+        /* الحاوية الرئيسية */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* البطاقات */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 36px;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        body.dark .card {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(51, 65, 85, 0.6);
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.4);
+        }
+
+        /* الرأس */
+        .header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .header h1 {
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #1f5e4b, #2c8c6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        body.dark .header h1 {
+            background: linear-gradient(135deg, #9ec8d9, #6abf8c);
+            -webkit-background-clip: text;
+        }
+        .sub {
+            color: #2c5f2d;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        body.dark .sub { color: #b9c7da; }
+
+        /* نموذج الإدخال */
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            flex: 1;
+            min-width: 130px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2b6e4f;
+        }
+        body.dark .input-group label { color: #94a3b8; }
+        input, select, button {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 60px;
+            border: none;
+            background: white;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        body.dark input, body.dark select {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid #334155;
+        }
+        button {
+            background: #2b6e4f;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        button:active { transform: scale(0.97); }
+        .btn-outline {
+            background: rgba(255,255,240,0.9);
+            color: #1f4e3d;
+            border: 1px solid #cbd5e1;
+            box-shadow: none;
+        }
+        body.dark .btn-outline {
+            background: #2d3b4f;
+            color: #e0f2fe;
+            border-color: #475569;
+        }
+
+        /* شبكة الأزرار */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .action-btn {
+            padding: 10px 5px;
+            font-size: 0.85rem;
+        }
+
+        /* شريط الصوت */
+        .audio-row {
+            margin: 15px 0 5px;
+        }
+        progress {
+            width: 100%;
+            height: 8px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        progress::-webkit-progress-bar { background-color: #cbd5e1; }
+        progress::-webkit-progress-value { background-color: #2b6e4f; }
+        .time-stamp {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            margin-top: 5px;
+            color: #4b5563;
+        }
+        body.dark .time-stamp { color: #9ca3af; }
+
+        /* صندوق الآية */
+        .ayah-container {
+            background: #fefaf0;
+            border-radius: 28px;
+            padding: 1.3rem;
+            text-align: center;
+            margin-top: 15px;
+        }
+        body.dark .ayah-container {
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+        .ayah-number {
+            font-size: 1rem;
+            color: #c2410c;
+            border-right: 3px solid #c2410c;
+            padding-right: 10px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        .ayah-text {
+            font-size: 1.6rem;
+            line-height: 2.3rem;
+            font-family: 'Amiri', 'Times New Roman', serif;
+            font-weight: 500;
+            margin: 0.8rem 0;
+        }
+        .translation {
+            background: rgba(0,0,0,0.03);
+            padding: 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-align: right;
+            color: #2d5a4b;
+            margin-top: 10px;
+            border-right: 3px solid #2b6e4f;
+        }
+        body.dark .translation {
+            background: #1e293b;
+            color: #cbd5e6;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* رسائل */
+        .error-msg {
+            color: #dc2626;
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 8px;
+        }
+        .success-msg {
+            color: #2b6e4f;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.65rem;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+        /* توافق الموبايل */
+        @media (max-width: 550px) {
+            body { padding: 12px; }
+            .card { padding: 1.2rem; }
+            .ayah-text { font-size: 1.3rem; line-height: 1.9rem; }
+            .input-row { gap: 8px; }
+            button, .action-btn { padding: 10px 8px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card header">
+        <h1><i class="fas fa-quran"></i> مساعد الكهف</h1>
+        <div class="sub">تلاوة آية آية + ترجمة المعاني + تدبر</div>
+        <button id="darkToggle" style="background: transparent; color: #2b6e4f; margin-top: 8px; box-shadow: none; width: auto; margin-left: auto; margin-right: auto;"><i class="fas fa-moon"></i> الوضع المظلم</button>
+    </div>
+
+    <div class="card">
+        <div class="input-row">
+            <div class="input-group">
+                <label><i class="fas fa-hashtag"></i> رقم الآية (1-110)</label>
+                <input type="number" id="ayahNumber" min="1" max="110" value="1">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-microphone-alt"></i> القارئ</label>
+                <select id="reciterSelect">
+                    <option value="ar.alafasy">مشاري العفاسي</option>
+                    <option value="ar.abdulbasit">عبد الباسط</option>
+                    <option value="ar.mahermuaiqly">ماهر المعيقلي</option>
+                    <option value="ar.saoodalshuraym">سعود الشريم</option>
+                </select>
+            </div>
+            <button id="playBtn"><i class="fas fa-play"></i> تشغيل</button>
+        </div>
+
+        <div class="actions-grid">
+            <button id="prevBtn" class="action-btn btn-outline"><i class="fas fa-backward"></i> سابق</button>
+            <button id="nextBtn" class="action-btn btn-outline"><i class="fas fa-forward"></i> تالي</button>
+            <button id="repeatBtn" class="action-btn btn-outline"><i class="fas fa-redo-alt"></i> تكرار</button>
+            <button id="stopBtn" class="action-btn btn-outline"><i class="fas fa-stop"></i> إيقاف</button>
+            <button id="randomBtn" class="action-btn btn-outline"><i class="fas fa-random"></i> عشوائي</button>
+        </div>
+
+        <div class="audio-row">
+            <progress id="progressBar" value="0" max="100"></progress>
+            <div class="time-stamp">
+                <span id="currentTime">0:00</span>
+                <span id="durationTime">0:00</span>
+            </div>
+        </div>
+        <div id="errorMsg" class="error-msg"></div>
+
+        <div class="ayah-container">
+            <div class="ayah-number">الآية <span id="displayAyah">1</span></div>
+            <div class="ayah-text" id="ayahText">⏳ جاري التحميل...</div>
+            <div class="translation" id="translationText"><i class="fas fa-language"></i> ترجمة المعاني ستظهر هنا</div>
+        </div>
+    </div>
+    <footer>
+        <i class="fas fa-mobile-alt"></i> متوافق مع الجوال | حفظ آخر آية وقارئ | ترجمة مختصرة
+    </footer>
+</div>
+
+<audio id="audioPlayer" preload="auto"></audio>
+
+<script>
+    // ========== إعدادات دقيقة لترقيم الآيات (نسخة مصححة) ==========
+    const SURAH = 18;
+    const MAX_AYAH = 110;
+    // مجموع آيات السور قبل الكهف بدقة:
+    const AYAHS_BEFORE = 7+286+200+176+120+165+206+75+129+109+123+111+43+52+99+128+111; // 2140
+    function getAbsoluteAyah(ayah) { return 2140 + ayah; }  // آية 1 => 2141, آية 2 => 2142, ...
+
+    // ========== متغيرات التطبيق ==========
+    let currentAyah = 1;
+    let currentReciter = "ar.alafasy";
+    let repeatMode = false;
+    let isPlaying = false;
+    let isLoading = false;
+
+    // عناصر DOM
+    const ayahInput = document.getElementById("ayahNumber");
+    const reciterSelect = document.getElementById("reciterSelect");
+    const playBtn = document.getElementById("playBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const repeatBtn = document.getElementById("repeatBtn");
+    const randomBtn = document.getElementById("randomBtn");
+    const displaySpan = document.getElementById("displayAyah");
+    const ayahTextSpan = document.getElementById("ayahText");
+    const translationSpan = document.getElementById("translationText");
+    const progressBar = document.getElementById("progressBar");
+    const currentTimeSpan = document.getElementById("currentTime");
+    const durationSpan = document.getElementById("durationTime");
+    const errorDiv = document.getElementById("errorMsg");
+    const audioElem = document.getElementById("audioPlayer");
+    const darkToggle = document.getElementById("darkToggle");
+
+    // ========== جلب النص والترجمة من API موثوق ==========
+    async function fetchAyahData(ayah) {
+        try {
+            // النص العربي (رسم عثماني)
+            const arabicRes = await fetch(`https://api.alquran.cloud/v1/ayah/${SURAH}:${ayah}/ar.alafasy`);
+            const arabicData = await arabicRes.json();
+            let arabicText = "﴿ الآية الكريمة ﴾";
+            if (arabicData.code === 200 && arabicData.data) arabicText = arabicData.data.text;
+
+            // ترجمة المعاني (للمساعدة في الفهم) - نستخدم ترجمة صحيح انترناشونال
+            const translationRes = await fetch(`https://api.alquran.cloud/v1/ayah/${SURAH}:${ayah}/en.sahih`);
+            const transData = await translationRes.json();
+            let translation = "";
+            if (transData.code === 200 && transData.data) {
+                translation = transData.data.text;
+            } else {
+                translation = "تأمل في الآية واستمع بخشوع";
+            }
+            return { arabic: arabicText, translation: translation };
+        } catch (err) {
+            console.warn(err);
+            return { arabic: "﴿ تعذر تحميل النص ﴾", translation: "يرجى التحقق من اتصال الإنترنت" };
+        }
+    }
+
+    async function updateDisplay() {
+        displaySpan.innerText = currentAyah;
+        ayahTextSpan.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جلب النص...';
+        translationSpan.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جلب الترجمة...';
+        const { arabic, translation } = await fetchAyahData(currentAyah);
+        ayahTextSpan.innerText = arabic;
+        translationSpan.innerHTML = `<i class="fas fa-language"></i> ${translation.substring(0, 280)}`;
+    }
+
+    // ========== بناء رابط الصوت (نفس المصدر الناجح) ==========
+    function getAudioUrl() {
+        const absolute = getAbsoluteAyah(currentAyah);
+        return `https://cdn.islamic.network/quran/audio/64/${currentReciter}/${absolute}.mp3`;
+    }
+
+    async function playAudio() {
+        if (isLoading) return;
+        isLoading = true;
+        errorDiv.innerText = "";
+        const url = getAudioUrl();
+        try {
+            if (audioElem.src !== url) {
+                audioElem.src = url;
+                audioElem.load();
+            }
+            await audioElem.play();
+            isPlaying = true;
+        } catch (err) {
+            console.error(err);
+            errorDiv.innerText = "❌ تعذر التشغيل. جرب قارئاً آخر أو تحقق من اتصالك.";
+            isPlaying = false;
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    async function playCurrent() {
+        let ayah = parseInt(ayahInput.value);
+        if (isNaN(ayah)) ayah = currentAyah;
+        ayah = Math.min(MAX_AYAH, Math.max(1, ayah));
+        if (ayah !== currentAyah) {
+            currentAyah = ayah;
+            ayahInput.value = currentAyah;
+            await updateDisplay();
+        }
+        currentReciter = reciterSelect.value;
+        await playAudio();
+        savePrefs();
+    }
+
+    function stopAudio() {
+        audioElem.pause();
+        audioElem.currentTime = 0;
+        isPlaying = false;
+        progressBar.value = 0;
+        currentTimeSpan.innerText = "0:00";
+        durationSpan.innerText = "0:00";
+    }
+
+    async function changeAyah(delta) {
+        let newAyah = currentAyah + delta;
+        if (newAyah < 1) newAyah = 1;
+        if (newAyah > MAX_AYAH) newAyah = MAX_AYAH;
+        if (newAyah === currentAyah) return;
+        currentAyah = newAyah;
+        ayahInput.value = currentAyah;
+        await updateDisplay();
+        await playAudio();
+        savePrefs();
+    }
+
+    async function randomAyah() {
+        const rand = Math.floor(Math.random() * MAX_AYAH) + 1;
+        currentAyah = rand;
+        ayahInput.value = currentAyah;
+        await updateDisplay();
+        await playAudio();
+        savePrefs();
+    }
+
+    function toggleRepeat() {
+        repeatMode = !repeatMode;
+        repeatBtn.style.background = repeatMode ? "#c44536" : "";
+        repeatBtn.innerHTML = repeatMode ? "🔁 إلغاء التكرار" : "🔄 تكرار";
+    }
+
+    // ========== حفظ التفضيلات ==========
+    function savePrefs() {
+        localStorage.setItem("kahf_ayah_final", currentAyah);
+        localStorage.setItem("kahf_reciter_final", currentReciter);
+        localStorage.setItem("kahf_dark_final", document.body.classList.contains("dark") ? "dark" : "light");
+    }
+
+    async function loadPrefs() {
+        const savedAyah = localStorage.getItem("kahf_ayah_final");
+        if (savedAyah && !isNaN(parseInt(savedAyah))) {
+            currentAyah = Math.min(MAX_AYAH, Math.max(1, parseInt(savedAyah)));
+            ayahInput.value = currentAyah;
+        }
+        const savedReciter = localStorage.getItem("kahf_reciter_final");
+        if (savedReciter && ["ar.alafasy","ar.abdulbasit","ar.mahermuaiqly","ar.saoodalshuraym"].includes(savedReciter)) {
+            currentReciter = savedReciter;
+            reciterSelect.value = currentReciter;
+        }
+        const darkPref = localStorage.getItem("kahf_dark_final");
+        if (darkPref === "dark") document.body.classList.add("dark");
+        await updateDisplay();
+        // تحميل الصوت مسبقاً لكن لا تشغيل
+        const preloadUrl = getAudioUrl();
+        audioElem.src = preloadUrl;
+        audioElem.load();
+    }
+
+    // ========== أحداث الصوت ==========
+    function bindAudioEvents() {
+        audioElem.addEventListener("timeupdate", () => {
+            if (audioElem.duration && !isNaN(audioElem.duration)) {
+                const percent = (audioElem.currentTime / audioElem.duration) * 100;
+                progressBar.value = percent;
+                currentTimeSpan.innerText = formatTime(audioElem.currentTime);
+                durationSpan.innerText = formatTime(audioElem.duration);
+            }
+        });
+        audioElem.addEventListener("ended", () => {
+            if (repeatMode) {
+                audioElem.currentTime = 0;
+                audioElem.play().catch(e=>console.warn);
+            } else {
+                isPlaying = false;
+            }
+        });
+        audioElem.addEventListener("error", () => {
+            if (!errorDiv.innerText.includes("قارئ")) {
+                errorDiv.innerText = "⚠️ خطأ في الصوت. قد لا تتوفر هذه الآية لهذا القارئ، جرب قارئاً آخر.";
+            }
+        });
+    }
+
+    function formatTime(sec) {
+        if (isNaN(sec)) return "0:00";
+        const mins = Math.floor(sec / 60);
+        const seconds = Math.floor(sec % 60);
+        return `${mins}:${seconds < 10 ? '0' + seconds : seconds}`;
+    }
+
+    function toggleDark() {
+        document.body.classList.toggle("dark");
+        savePrefs();
+    }
+
+    // ========== التهيئة ==========
+    async function init() {
+        bindAudioEvents();
+        await loadPrefs();
+        playBtn.onclick = () => playCurrent();
+        stopBtn.onclick = () => stopAudio();
+        prevBtn.onclick = () => changeAyah(-1);
+        nextBtn.onclick = () => changeAyah(1);
+        repeatBtn.onclick = () => toggleRepeat();
+        randomBtn.onclick = () => randomAyah();
+        darkToggle.onclick = () => toggleDark();
+        ayahInput.addEventListener("change", () => playCurrent());
+        reciterSelect.addEventListener("change", () => playCurrent());
+        errorDiv.innerText = "✅ التطبيق جاهز | الآيات متطابقة | ترجمة معاني";
+    }
+
+    init();
+</script>
+</body>
+</html>
