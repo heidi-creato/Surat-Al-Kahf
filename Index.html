@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>مساعد القرآن | تلاوة سورة كاملة بسلاسة</title>
+    <title>مساعد القرآن | تلاوة سلسة + تمرير تلقائي للآية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -92,7 +92,13 @@
 
         progress { width: 100%; height: 8px; border-radius: 10px; }
         .time-stamp { display: flex; justify-content: space-between; font-size: 0.7rem; margin-top: 4px; }
-        .ayah-container { background: #fefaf0; border-radius: 28px; padding: 1.2rem; margin-top: 15px; }
+        .ayah-container {
+            background: #fefaf0;
+            border-radius: 28px;
+            padding: 1.2rem;
+            margin-top: 15px;
+            scroll-margin-top: 70px; /* لتجنب تغطية الهيدر عند التمرير */
+        }
         body.dark .ayah-container { background: #0f172a; }
         .ayah-number { font-size: 1rem; color: #c2410c; border-right: 3px solid #c2410c; padding-right: 8px; display: inline-block; }
         .ayah-text { font-size: 1.5rem; line-height: 2.2rem; font-family: 'Amiri', serif; margin: 12px 0; }
@@ -105,6 +111,7 @@
             .circle-btn { min-width: 44px; height: 44px; font-size: 0.85rem; }
             .ayah-circle { min-width: 38px; height: 38px; }
             .ayah-text { font-size: 1.2rem; line-height: 1.8rem; }
+            .ayah-container { scroll-margin-top: 60px; }
         }
     </style>
 </head>
@@ -112,7 +119,7 @@
 <div class="container">
     <div class="card header">
         <h1><i class="fas fa-quran"></i> مساعد القرآن</h1>
-        <div class="sub">تلاوة سورة كاملة بسلاسة (بدون تقطيع) + آيات مفردة + تسلسل</div>
+        <div class="sub">تلاوة سورة كاملة بسلاسة + تمرير تلقائي عند كل آية</div>
         <button id="darkToggle" style="background: transparent; color:#2b6e4f; margin-top:6px; width:auto;"><i class="fas fa-moon"></i> مظلم</button>
     </div>
 
@@ -162,13 +169,14 @@
         <div><progress id="progressBar" value="0" max="100"></progress><div class="time-stamp"><span id="currentTime">0:00</span><span id="durationTime">0:00</span></div></div>
         <div id="errorMsg" class="error-msg"></div>
 
-        <div class="ayah-container">
+        <!-- حاوية الآية التي سنمرر إليها -->
+        <div class="ayah-container" id="ayahContainer">
             <div class="ayah-number">سورة <span id="surahNameDisplay">الكهف</span> - الآية <span id="displayAyah">1</span> <span id="modeIndicator" class="mode-indicator">آية مفردة</span></div>
             <div class="ayah-text" id="ayahText">⏳ جاري التحميل...</div>
             <div class="translation" id="translationText"><i class="fas fa-language"></i> ترجمة المعاني</div>
         </div>
     </div>
-    <footer>🔊 تشغيل السورة كاملة: تحميل مسبق للآية التالية → انتقال فوري بدون فراغات</footer>
+    <footer>🔊 تشغيل السورة كاملة: تحميل مسبق + تمرير تلقائي إلى الآية الجديدة</footer>
 </div>
 
 <audio id="audioPlayer" preload="auto"></audio>
@@ -184,9 +192,8 @@
     let repeatMode = false, sequentialMode = false, fullSurahMode = false;
     let isPlaying = false, isLoading = false;
     let fullSurahStop = false;
-    let preloadedAudio = null;       // عنصر audio مخفي للتحميل المسبق
-    let nextAyahPreload = null;      // رقم الآية التي تم تحميلها مسبقاً
-    let nextSurahPreload = null;
+    let preloadedAudio = null;
+    let nextAyahPreload = null, nextSurahPreload = null;
 
     // عناصر DOM
     const surahNumberInput = document.getElementById("surahNumber");
@@ -215,6 +222,14 @@
     const darkToggle = document.getElementById("darkToggle");
     const surahCirclesDiv = document.getElementById("surahCircles");
     const ayahCirclesDiv = document.getElementById("ayahCircles");
+    const ayahContainer = document.getElementById("ayahContainer");
+
+    // ========== دالة التمرير التلقائي ==========
+    function scrollToAyah() {
+        if (ayahContainer) {
+            ayahContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
 
     // ========== دوال البناء ==========
     function buildSurahCircles() {
@@ -269,6 +284,8 @@
         ayahTextSpan.innerText = arabic;
         translationSpan.innerHTML = `<i class="fas fa-language"></i> ${translation.substring(0,300)}`;
         displaySurahNameSpan.innerText = surahNames[currentSurah-1];
+        // التمرير التلقائي بعد تحديث المحتوى
+        scrollToAyah();
     }
 
     // ========== دوال الصوت مع التحميل المسبق ==========
@@ -276,7 +293,6 @@
         return `https://cdn.islamic.network/quran/audio/64/${reciter}/${getAbsoluteAyahNumber(surah, ayah)}.mp3`;
     }
 
-    // تحميل مسبق للآية التالية (يستخدم عنصر audio منفصل)
     function preloadNextAyah() {
         if(!fullSurahMode) return;
         const maxAyah = surahAyahCount[currentSurah-1];
@@ -309,7 +325,6 @@
             }
             await audioElem.play();
             isPlaying = true;
-            // بعد بدء التشغيل، قم بتحميل التالي مسبقاً
             if(fullSurahMode) preloadNextAyah();
         } catch(err) {
             errorDiv.innerText = "❌ تعذر التشغيل. جرب قارئاً آخر.";
@@ -352,12 +367,10 @@
         sequentialMode = false; seqToggle.checked = false;
         repeatMode = false; repeatBtn.style.background = "";
         modeIndicator.innerText = "🎧 سورة كاملة (بدون تقطيع)";
-        // نبدأ من أول آية في السورة الحالية
         currentAyah = 1;
         ayahInput.value = currentAyah;
         await updateDisplay();
         updateActiveAyahCircle();
-        // إنشاء عنصر preload إذا لم يوجد
         if(!preloadedAudio) {
             preloadedAudio = new Audio();
             preloadedAudio.preload = "auto";
@@ -378,7 +391,6 @@
         setTimeout(()=>{ if(errorDiv.innerText.includes("تم إيقاف")) errorDiv.innerText = ""; }, 2000);
     }
 
-    // الانتقال السلس إلى الآية التالية (يستخدم preload)
     async function smoothNextAyah() {
         if(!fullSurahMode || fullSurahStop) return;
         const maxAyah = surahAyahCount[currentSurah-1];
@@ -396,21 +408,17 @@
             }
             nextAyah = 1;
         }
-        // إذا كان لدينا تحميل مسبق صالح
         let needLoad = true;
         if(preloadedAudio && nextAyahPreload === nextAyah && nextSurahPreload === nextSurah && preloadedAudio.src) {
-            // نستخدم المصدر المحمل مسبقاً
-            const oldSrc = audioElem.src;
             audioElem.src = preloadedAudio.src;
             audioElem.load();
             try {
                 await audioElem.play();
                 isPlaying = true;
                 needLoad = false;
-            } catch(e) { console.warn(e); needLoad = true; }
+            } catch(e) { needLoad = true; }
         }
         if(needLoad) {
-            // تحميل عادي
             currentSurah = nextSurah; currentAyah = nextAyah;
             ayahInput.value = currentAyah;
             surahNumberInput.value = currentSurah;
@@ -422,7 +430,6 @@
             savePrefs();
             return;
         }
-        // التحديث بعد التشغيل الناجح من preload
         currentSurah = nextSurah; currentAyah = nextAyah;
         ayahInput.value = currentAyah;
         surahNumberInput.value = currentSurah;
@@ -430,12 +437,10 @@
         displaySurahNameSpan.innerText = surahNames[currentSurah-1];
         await updateDisplay();
         updateActiveSurahCircle(); buildAyahCircles();
-        // تحميل المسبق التالي بعد التشغيل
         if(fullSurahMode) preloadNextAyah();
         savePrefs();
     }
 
-    // وضع التسلسل عبر السور (يعمل مع الآيات المفردة)
     async function nextAyahForSequential() {
         if(fullSurahMode) return;
         const maxAyah = surahAyahCount[currentSurah-1];
@@ -588,7 +593,7 @@
         surahNumberInput.addEventListener("change", () => changeSurah(parseInt(surahNumberInput.value)));
         ayahInput.addEventListener("change", () => playCurrent());
         reciterSelect.addEventListener("change", () => playCurrent());
-        errorDiv.innerText = "✅ التطبيق جاهز | تشغيل السورة كاملة بسلاسة (بدون تقطيع)";
+        errorDiv.innerText = "✅ التطبيق جاهز | التمرير التلقائي مفعّل عند كل آية";
     }
     init();
 </script>
